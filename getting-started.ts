@@ -1,8 +1,11 @@
 import { Schema, model, connect } from "mongoose";
 import express from "express";
-const PORT = 4000;
+const PORT = 4001;
 
 const app = express();
+
+const cors = require("cors");
+app.use(cors());
 
 main().catch((err) => console.log(err));
 
@@ -72,7 +75,9 @@ async function main() {
 
   app.get("/allPerformances", async (req, res) => {
     try {
+      console.log("A request was made for all performances");
       const allPerformances = await Performance.find();
+      console.log(allPerformances);
       return res.status(200).send(allPerformances);
     } catch (e) {
       console.log(e.message);
