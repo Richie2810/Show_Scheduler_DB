@@ -11,7 +11,8 @@ interface Performance {
   title:string,
   start_date:Date,
   end_date:Date,
-  description:string
+  description:string,
+  status:string  
 }
 
 interface Fan {
@@ -30,6 +31,7 @@ async function main() {
       start_date: {type:Date, required:true},
       end_date: {type:Date, required:true},
       description: {type:String, required:true},
+
   });
 
   const fanSchema = new Schema<Fan>({
@@ -84,7 +86,8 @@ async function main() {
           title,
           start_date,
           end_date,
-          description
+          description,
+          status:"green"
         })
         newPerformance.save()
         return res.status(200).send("successful")
@@ -127,9 +130,38 @@ async function main() {
       }
     })
     //console.log(queen)
+    app.get('/15MinuteCall', async (req, res)=>{
+      try{
+        const fan = await Fan.find({name:req.body.name})
+        for (let perf in fan){
+          const performance = await Performance.findById(perf)
+          if (new Date(performance.start_date).getTime() < new Date().getTime()-900000 && performance.status==="green"){
+            res.status(400).send(true)
+            await Performance.updateOne(Performance, {status:"red"})
+          }
+        }
+      }catch(e){
+        console.log(e.message)
+        return res.status(400).send("Database down || bad request")
+      }
+    })
+
+    //Need to change this to perf.end_date and perf.title
+    app.get('/showsOver', async (req,res)=>{
+      try{
+        const allPerformances = await Performance.find();
+        for (let perf in allPerformances){
+          if(new Date(perf).getTime() < new Date().getDate()){
+            Performance.deleteOne({ title:perf})
+          }
+        }
+      }catch(e){
+        console.log(e.message)
+        return res.status(400).send("Database down || bad request")
+      }
+    })
 
     app.listen(PORT, () => {
       console.log(`Listening on port: ${PORT}`);
     });
-
 }
