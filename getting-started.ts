@@ -41,7 +41,7 @@ async function main() {
   })
 
 
-  // performanceSchema.methods.speak = function speak() {
+  // performanceSchema.methods. = function speak() {
   //     const greeting = this.title
   //       ? "Meow name is " + this.title
   //       : "I don't have a name";
