@@ -7,6 +7,8 @@ const app = express();
 const cors = require("cors");
 app.use(cors());
 
+app.use(express.json());
+
 main().catch((err) => console.log(err));
 
 interface Performance {
@@ -65,6 +67,14 @@ async function main() {
   //   end_date:"2021-09-28T15:00:00.000",
   //   description:"Massive UK base Rock band"
   // })
+  // const greenday = new Performance({
+  //   title: "greenday",
+  //   start_date: "2021-09-28T17:00:00.000",
+  //   end_date: "2021-09-28T20:00:00.000",
+  //   description: "Famous song is American Idiot",
+  // });
+
+  // greenday.save();
 
   const Richie = new Fan({
     name: "Richie",
@@ -104,11 +114,23 @@ async function main() {
   });
 
   app.post("/newFan", async (req, res) => {
+    const { name } = req.body;
+    console.log(name);
+
     try {
-      const newFan = new Fan({
-        name: req.body.name,
-        performances: [],
-      });
+      const fan = await Fan.find({ name: req.body.name });
+      console.log(fan);
+      if (fan.length === 0) {
+        console.log("length is 0");
+        const newFan = new Fan({
+          name: req.body.name,
+          performances: [],
+        });
+        newFan.save();
+        return res.status(200).send(newFan);
+      } else {
+        return res.status(200).send(fan);
+      }
     } catch (e) {
       console.log(e.message);
       res.status(400).send("Database down || bad request");
@@ -129,11 +151,14 @@ async function main() {
 
   app.patch("/addToSchedule", async (req, res) => {
     try {
-      const performance = await Performance.find({ title: req.body.title });
+      const fanPerformances = await Fan.find({
+        name: req.body.name,
+      });
       const fan = await Fan.findOneAndUpdate(
         { name: req.body.name },
-        { Performances: performance }
+        { performances: [...fanPerformances, req.body.performance] }
       );
+      fan.save();
       return res.status(200).send(fan);
     } catch (e) {
       console.log(e.message);
