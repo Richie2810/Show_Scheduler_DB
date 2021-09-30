@@ -57,6 +57,7 @@ async function main() {
   //       : "I don't have a name";
   //     console.log(greeting);
   //   };
+
   const Fan = model<Fan>("Fan", fanSchema);
 
   const Performance = model<Performance>("Performance", performanceSchema);
@@ -85,9 +86,7 @@ async function main() {
 
   app.get("/allPerformances", async (req, res) => {
     try {
-      console.log("A request was made for all performances");
       const allPerformances = await Performance.find();
-      console.log(allPerformances);
       return res.status(200).send(allPerformances);
     } catch (e) {
       console.log(e.message);
@@ -115,13 +114,10 @@ async function main() {
 
   app.post("/newFan", async (req, res) => {
     const { name } = req.body;
-    console.log(name);
 
     try {
       const fan = await Fan.find({ name: req.body.name });
-      console.log(fan);
       if (fan.length === 0) {
-        console.log("length is 0");
         const newFan = new Fan({
           name: req.body.name,
           performances: [],
