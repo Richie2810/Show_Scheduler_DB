@@ -16,7 +16,6 @@ interface Performance {
   start_date: Date;
   end_date: Date;
   description: string;
-  status: string;
 }
 
 interface Fan {
@@ -98,16 +97,30 @@ async function main() {
 
   app.post("/addPerformance", async (req, res) => {
     try {
-      const { title, start_date, end_date, description } = req.body;
+      const { title, description, start_date, end_date } = req.body;
+
       const newPerformance = new Performance({
         title,
+        description,
         start_date,
         end_date,
-        description,
-        status: "green",
       });
       newPerformance.save();
-      return res.status(200).send("successful");
+      const allPerformances = await Performance.find();
+      console.log(allPerformances);
+      return res.status(200).send(allPerformances);
+    } catch (e) {
+      console.log(e.message);
+      return res.status(400).send("Database down || bad request");
+    }
+  });
+
+  app.post("/removePerformance", async (req, res) => {
+    try {
+      console.log(typeof req.body.performance);
+      await Performance.deleteOne({ title: req.body.performance });
+      const allPerformances = await Performance.find();
+      return res.status(200).send(allPerformances);
     } catch (e) {
       console.log(e.message);
       return res.status(400).send("Database down || bad request");
@@ -167,21 +180,36 @@ async function main() {
       return res.status(400).send("Database down || bad request");
     }
   });
+
+  app.patch("/removeSchedule", async (req, res) => {
+    try {
+      const updateFan = await Fan.updateOne(
+        { name: req.body.name },
+        {
+          $pull: { performances: req.body.performance },
+        }
+      );
+      const fan = await Fan.find({ name: req.body.name });
+      return res.status(200).send(fan);
+    } catch (e) {
+      console.log(e.message);
+      return res.status(400).send("Database down || bad request");
+    }
+  });
   //console.log(queen)
   app.get("/15MinuteCall", async (req, res) => {
     try {
-      const fan = await Fan.find({ name: req.body.name });
-      for (let perf in fan) {
-        const performance = await Performance.findById(perf);
-        if (
-          new Date(performance.start_date).getTime() <
-            new Date().getTime() - 900000 &&
-          performance.status === "green"
-        ) {
-          res.status(400).send(true);
-          await Performance.updateOne(Performance, { status: "red" });
-        }
-      }
+      const performancesOfUser = await Fan.find({
+        name: req.body.name,
+      }).populate("performances");
+      console.log(performancesOfUser);
+      // if (
+      //   new Date(performancesOfUser.performances.start_date).getTime() <
+      //   new Date().getTime() - 900000
+      // ) {
+      //   res.status(400).send(true);
+      //   await Performance.updateOne(Performance, { status: "red" });
+      // }
     } catch (e) {
       console.log(e.message);
       return res.status(400).send("Database down || bad request");
