@@ -197,19 +197,12 @@ async function main() {
     }
   });
   //console.log(queen)
-  app.get("/15MinuteCall", async (req, res) => {
+  app.post("/15MinuteCall", async (req, res) => {
     try {
       const performancesOfUser = await Fan.find({
         name: req.body.name,
       }).populate("performances");
-      console.log(performancesOfUser);
-      // if (
-      //   new Date(performancesOfUser.performances.start_date).getTime() <
-      //   new Date().getTime() - 900000
-      // ) {
-      //   res.status(400).send(true);
-      //   await Performance.updateOne(Performance, { status: "red" });
-      // }
+      return res.status(200).send(performancesOfUser);
     } catch (e) {
       console.log(e.message);
       return res.status(400).send("Database down || bad request");
