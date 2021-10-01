@@ -51,12 +51,14 @@ async function main() {
     ],
   });
 
-  // performanceSchema.methods. = function speak() {
-  //     const greeting = this.title
-  //       ? "Meow name is " + this.title
-  //       : "I don't have a name";
-  //     console.log(greeting);
-  //   };
+  fanSchema.method("hasPerformance", function (performanceId) {
+    const scheduledPerformances = this.performances;
+    if (scheduledPerformances.contains(performanceId)) {
+      return true;
+    } else {
+      return false;
+    }
+  });
 
   const Fan = model<Fan>("Fan", fanSchema);
 
@@ -133,12 +135,12 @@ async function main() {
     }
   });
 
-  app.get("/mySchedule", async (req, res) => {
+  app.post("/mySchedule", async (req, res) => {
     try {
       const performancesOfUser = await Fan.find({
         name: req.body.name,
-      }).populate("performance");
-      return res.status(200).json(performancesOfUser);
+      }).populate("performances");
+      return res.status(200).send(performancesOfUser[0].performances);
     } catch (e) {
       console.log(e.message);
       return res.status(400).send("Database down || bad request");
@@ -147,14 +149,18 @@ async function main() {
 
   app.patch("/addToSchedule", async (req, res) => {
     try {
-      const fanPerformances = await Fan.find({
+      const isScheduled = await Fan.find({
         name: req.body.name,
+        performances: req.body.performance,
       });
-      const fan = await Fan.findOneAndUpdate(
-        { name: req.body.name },
-        { performances: [...fanPerformances, req.body.performance] }
-      );
-      fan.save();
+      console.log(isScheduled);
+      if (isScheduled.length === 0) {
+        const updateFan = await Fan.updateOne(
+          { name: req.body.name },
+          { $push: { performances: req.body.performance } }
+        );
+      }
+      const fan = await Fan.find({ name: req.body.name });
       return res.status(200).send(fan);
     } catch (e) {
       console.log(e.message);
