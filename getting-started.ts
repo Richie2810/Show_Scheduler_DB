@@ -210,14 +210,19 @@ async function main() {
   });
 
   //Need to change this to perf.end_date and perf.title
-  app.get("/showsOver", async (req, res) => {
+  app.delete("/showsOver", async (req, res) => {
     try {
       const allPerformances = await Performance.find();
-      for (let perf in allPerformances) {
-        if (new Date(perf).getTime() < new Date().getDate()) {
-          Performance.deleteOne({ title: perf });
+      allPerformances.map(async (perf) => {
+        if (new Date(perf.end_date).getTime() < new Date().getTime()) {
+          console.log("Show is over");
+          const deletePerformance = await Performance.deleteOne({
+            title: perf.title,
+          });
         }
-      }
+      });
+      const allInDatePerformances = await Performance.find();
+      return res.status(200).send(allInDatePerformances);
     } catch (e) {
       console.log(e.message);
       return res.status(400).send("Database down || bad request");
