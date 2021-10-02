@@ -77,6 +77,7 @@ async function main() {
   // });
 
   // greenday.save();
+  // queen.save()
 
   const Richie = new Fan({
     name: "Richie",
