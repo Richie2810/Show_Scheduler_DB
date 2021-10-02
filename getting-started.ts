@@ -129,8 +129,6 @@ async function main() {
   });
 
   app.post("/newFan", async (req, res) => {
-    const { name } = req.body;
-
     try {
       const fan = await Fan.find({ name: req.body.name });
       if (fan.length === 0) {
