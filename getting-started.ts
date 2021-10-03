@@ -208,7 +208,7 @@ async function main() {
     }
   });
 
-  //Need to change this to perf.end_date and perf.title
+  //This checks for a show that is past its end Date than deletes it from the DB
   app.delete("/showsOver", async (req, res) => {
     try {
       const allPerformances = await Performance.find();
