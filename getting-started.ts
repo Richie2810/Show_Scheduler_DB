@@ -63,28 +63,28 @@ async function main() {
 
   const Performance = model<Performance>("Performance", performanceSchema);
 
-  // const queen = new Performance({
-  //   title: "Queen",
-  //   start_date: "2021-09-28T14:00:00.000",
-  //   end_date:"2021-09-28T15:00:00.000",
-  //   description:"Massive UK base Rock band"
-  // })
-  // const greenday = new Performance({
-  //   title: "greenday",
-  //   start_date: "2021-09-28T17:00:00.000",
-  //   end_date: "2021-09-28T20:00:00.000",
-  //   description: "Famous song is American Idiot",
-  // });
+  const queen = new Performance({
+    title: "Queen",
+    start_date: "2021-09-28T14:00:00.000",
+    end_date: "2021-09-28T15:00:00.000",
+    description: "Massive UK base Rock band",
+  });
+  const greenday = new Performance({
+    title: "greenday",
+    start_date: "2021-09-28T17:00:00.000",
+    end_date: "2021-09-28T20:00:00.000",
+    description: "Famous song is American Idiot",
+  });
 
   // greenday.save();
   // queen.save()
 
-  const Richie = new Fan({
-    name: "Richie",
-    performances: ["615301266d4b6f838a9d32b1"],
+  const Admin = new Fan({
+    name: "ADMIN",
+    performances: [],
   });
 
-  // Richie.save()
+  // Admin.save();
 
   app.get("/allPerformances", async (req, res) => {
     try {
@@ -131,13 +131,14 @@ async function main() {
   app.post("/newFan", async (req, res) => {
     try {
       const fan = await Fan.find({ name: req.body.name });
+      console.log(fan);
       if (fan.length === 0) {
         const newFan = new Fan({
           name: req.body.name,
           performances: [],
         });
         newFan.save();
-        return res.status(200).send(newFan);
+        return res.status(200).send([newFan]);
       } else {
         return res.status(200).send(fan);
       }
